@@ -43,7 +43,8 @@
   .warn{background:rgba(248,113,113,.10);border:1px solid rgba(248,113,113,.4);color:#fca5a5;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.9}
   .qrBox{background:#fff;padding:14px;border-radius:12px;display:inline-block;margin-top:12px}
   .qrBox canvas,.qrBox img{display:block}
-  .volRow{display:flex;align-items:center;gap:12px}
+  .volRow{display:flex;align-items:center;gap:12px;margin-top:8px}
+  .volRow .lab{margin-bottom:0;min-width:90px}
   .volRow input{flex:1}
   .volRow span{min-width:44px;text-align:center;color:var(--acc2);font-size:13px}
   #app{display:none}
@@ -175,7 +176,7 @@ var DEFAULT_MENU = [
     { name: "سالاد سزار", note: "با مرغ و پارمزان", price: "۱۸۵,۰۰ تومان", tags: ["پرفروش"] },
     { name: "سالاد یونانی", note: "", price: "۱۶,۰۰ تومان", tags: ["گیاهی"] },
     { name: "ساندویچ کلاب", note: "با سیب‌زمینی", price: "۲۱۰,۰۰ تومان", tags: [] },
-    { name: "پاستا آلفردو", note: "", price: "۲۴۰,۰۰ تومان", tags: ["گیاهی"] }
+    { name: "پاستا آلفردو", note: "", price: "۲۴,۰۰ تومان", tags: ["گیاهی"] }
   ]}
 ];
 var DEF_TEAM = [
@@ -243,7 +244,7 @@ var DEF_SETTINGS = {
   customSections: [],
   brand: {},
   musicUrl: "",
-  musicVol: 0.6,
+  musicVol: 0.8,
   lat: 35.7448,
   lng: 51.3753,
   team: DEF_TEAM
@@ -276,7 +277,7 @@ edits.settings.sectionsOff = edits.settings.sectionsOff || {};
 edits.settings.customSections = edits.settings.customSections || [];
 edits.settings.brand = edits.settings.brand || {};
 edits.settings.team = (edits.settings.team && edits.settings.team.length) ? edits.settings.team : deep(DEF_TEAM);
-if (edits.settings.musicVol == null) edits.settings.musicVol = 0.6;
+if (edits.settings.musicVol == null) edits.settings.musicVol = 0.8;
 var MD = deep(edits.menu || M.menu || []);
 var dirty = false, dirHandle = null, pvTimer = null;
 
@@ -330,7 +331,7 @@ function effective(){
 }
 function draft(){ try{ localStorage.setItem(K_D, JSON.stringify({edits:edits, menu:MD})); }catch(e){} }
 function touch(){ dirty=true; document.getElementById("dirty").hidden=false; draft(); preview(); }
-function toast(m){ var t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},2600); }
+function toast(m){ var t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},3200); }
 
 /* نوشتن فایل موزیک داخل پوشه پروژه: media/music.mp3 */
 async function placeMusic(file){
@@ -580,10 +581,10 @@ function sectionsCard(){
   c.appendChild(b); return c;
 }
 
-/* ===== ⚙️ تنظیمات (با ولوم و موزیک) ===== */
+/* ===== ⚙️ تنظیمات (موسیقی + ولوم + نقشه) ===== */
 function settingsCard(){
   var c=card("settings","⚙️","تنظیمات و تماس"), b=el("div","rows"), S=edits.settings;
-  b.appendChild(el("p","hint","ساعت‌ها ۲۴ساعته‌اند (22 یعنی ۱۰ شب). موسیقی: خالی = جَز زندهٔ داخلی؛ با آپلود MP3 فایل داخل پوشهٔ پروژه (media/music.mp3) قرار می‌گیرد و برای همهٔ بازدیدکننده‌ها پخش می‌شود. ولوم روی هر دو حالت اثر دارد."));
+  b.appendChild(el("p","hint","ساعت‌ها ۲۴ساعته‌اند (22 یعنی ۱۰ شب). موسیقی: خالی = جَز زندهٔ داخلی؛ با آپلود MP3 فایل داخل پوشهٔ پروژه (media/music.mp3) می‌نشیند و برای همه پخش می‌شود. ولوم روی هر دو حالت اثر دارد."));
   function sf(key,label,ph){
     var d=el("div","fld"); d.dataset.label=("تنظیمات "+label).toLowerCase();
     d.appendChild(el("div","lab",el("span","",label)));
@@ -593,7 +594,7 @@ function settingsCard(){
   }
   b.appendChild(g("g3", sf("tel","لینک تلفن","tel:+9821..."), sf("whatsapp","لینک واتساپ","https://wa.me/989..."), sf("instagram","لینک اینستاگرام","https://instagram.com/...")));
 
-  /* ردیف موسیقی + ولوم */
+  /* ردیف موسیقی + ولوم — بدون سقف ۳ مگ */
   var mRow=el("div","fld full"); mRow.dataset.label="تنظیمات موسیقی";
   mRow.appendChild(el("div","lab",el("span","","موسیقی کافه (MP3) — خالی یعنی جَز زنده")));
   var mInp=el("input"); mInp.type="text"; mInp.value=S.musicUrl||""; mInp.placeholder="media/music.mp3 یا https://… یا خالی";
@@ -604,15 +605,21 @@ function settingsCard(){
   var mFi=el("input"); mFi.type="file"; mFi.accept="audio/*"; mFi.hidden=true;
   mFi.onchange=function(){
     var f=mFi.files[0]; if(!f) return;
+    if(f.size > 25*1024*1024){
+      toast("⚠ برای گیت بهتر است زیر ۲۵MB باشد؛ یک mp3 با بیت‌ریت ۱۲۸ معمولاً ۳-۶MB است.");
+      return;
+    }
     placeMusic(f).then(function(ok){
       if(ok){
         S.musicUrl="media/music.mp3"; mInp.value="media/music.mp3"; touch();
-        toast("🎵 موزیک در media/music.mp3 نشست؛ با سایت منتشر می‌شود و برای همه پخش می‌شود.");
+        toast("🎵 موزیک در media/music.mp3 نشست؛ با ذخیره و push برای همه پخش می‌شود.");
       } else {
-        if(f.size > 3*1024*1024){ toast("⚠ نوشتن روی پوشه ممکن نشد؛ فایل بزرگ‌تر از ۳MB است و embed پیشنهاد نمی‌شود. دوباره با انتخاب پوشهٔ سایت امتحان کن."); return; }
-        var r=new FileReader();
-        r.onload=function(){ S.musicUrl=r.result; mInp.value="(embed شده در فایل)"; touch(); toast("🎵 موزیک embed شد؛ بهتر است بعداً در media/ قرار گیرد."); };
-        r.readAsDataURL(f);
+        var a=document.createElement("a");
+        a.href=URL.createObjectURL(f);
+        a.download="music.mp3";
+        a.click();
+        S.musicUrl="media/music.mp3"; mInp.value="media/music.mp3"; touch();
+        toast("⬇ music.mp3 دانلود شد؛ آن را داخل پوشهٔ media/ پروژه بینداز. مسیر ست شد.");
       }
     });
   };
@@ -622,11 +629,11 @@ function settingsCard(){
   mBtns.appendChild(mClr);
   mRow.appendChild(mBtns);
   var vWrap=el("div","volRow");
+  vWrap.appendChild(el("div","lab",el("span","","میزان صدا")));
   var vInp=el("input"); vInp.type="range"; vInp.min="0"; vInp.max="100";
-  vInp.value=Math.round((S.musicVol!=null?S.musicVol:0.6)*100);
+  vInp.value=Math.round((S.musicVol!=null?S.musicVol:0.8)*100);
   var vLab=el("span","",vInp.value+"٪");
   vInp.oninput=function(){ S.musicVol=vInp.value/100; vLab.textContent=vInp.value+"٪"; touch(); };
-  vWrap.appendChild(el("div","lab",el("span","","میزان صدا")));
   vWrap.appendChild(vInp); vWrap.appendChild(vLab);
   mRow.appendChild(vWrap);
   b.appendChild(mRow);
@@ -670,7 +677,7 @@ function menuCard(){
     b.appendChild(fix);
   }
   b.appendChild(fld("text","menu.title","عنوان بخش منو",true));
-  b.appendChild(el("p","hint","زیر هر آیتم: برچسب‌ها (فیلترها) و دکمهٔ  (پیش‌نمایش شناور هاور). کلیک دوباره روی 📷 = حذف تصویر."));
+  b.appendChild(el("p","hint","زیر هر آیتم: برچسب‌ها (فیلترها) و دکمهٔ 📷 (پیش‌نمایش شناور هاور). کلیک دوباره روی 📷 = حذف تصویر."));
   MD.forEach(function(cat,ci){
     var box=el("div","ev"); box.dataset.label=("دسته منو "+(ci+1)+" "+(cat.title||"")).toLowerCase();
     var head=el("div","trow"); head.style.gridTemplateColumns="1fr 1fr 40px";

@@ -1,4 +1,4 @@
-// cms.js — نسخه ۲۸: ولوم موسیقی + media/music.mp3
+// cms.js — نسخه ۲۹: ولوم بالاتر + همه قابلیت‌های قبلی
 (function () {
   var K_C = "cms-content-v2";
   var DEFAULT_HERO = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1400&auto=format&fit=crop";
@@ -20,17 +20,17 @@
   ];
   var DEFAULT_MENU = [
     { title: "بار گرم", sizes: "", items: [
-      { name: "اسپرسو", note: "همیشه دبل", price: "۸۵,۰۰۰ تومان", tags: ["گرم","پرفروش"] },
-      { name: "ماکیاتو", note: "", price: "۹۰,۰۰۰ تومان", tags: ["گرم"] },
-      { name: "کورتادو", note: "", price: "۹۵,۰۰۰ تومان", tags: ["گرم"] },
-      { name: "فلت وایت", note: "", price: "۱۰۵,۰۰۰ تومان", tags: ["گرم","پرفروش"] },
-      { name: "کاپوچینو", note: "", price: "۱۰,۰۰۰ تومان", tags: ["گرم"] },
-      { name: "لاته", note: "", price: "۱۱,۰۰۰ تومان", tags: ["گرم"] },
+      { name: "اسپرسو", note: "همیشه دبل", price: "۸۵,۰۰ تومان", tags: ["گرم","پرفروش"] },
+      { name: "ماکیاتو", note: "", price: "۹۰,۰۰ تومان", tags: ["گرم"] },
+      { name: "کورتادو", note: "", price: "۹۵,۰۰ تومان", tags: ["گرم"] },
+      { name: "فلت وایت", note: "", price: "۱۰۵,۰۰ تومان", tags: ["گرم","پرفروش"] },
+      { name: "کاپوچینو", note: "", price: "۱۰,۰۰ تومان", tags: ["گرم"] },
+      { name: "لاته", note: "", price: "۱۱,۰۰ تومان", tags: ["گرم"] },
       { name: "موکا", note: "با شکلات ۷۰٪", price: "۱۳۰,۰۰ تومان", tags: ["گرم","ویژه"] }
     ]},
     { title: "نوشیدنی سرد", sizes: "", items: [
-      { name: "آیس لاته", note: "", price: "۱۱,۰۰۰ تومان", tags: ["سرد","پرفروش"] },
-      { name: "کلد برو", note: "دم‌کرده ۱۸ ساعته", price: "۱۱۰,۰۰ تومان", tags: ["سرد"] },
+      { name: "آیس لاته", note: "", price: "۱۱,۰۰ تومان", tags: ["سرد","پرفروش"] },
+      { name: "کلد برو", note: "دم‌کرده ۱۸ ساعته", price: "۱۱,۰۰ تومان", tags: ["سرد"] },
       { name: "آیس آمریکانو", note: "", price: "۹۵,۰۰ تومان", tags: ["سرد"] },
       { name: "لیموناد نعنا", note: "بدون کافئین", price: "۸۰,۰۰ تومان", tags: ["سرد","بدون کافئین","گیاهی"] }
     ]},
@@ -139,7 +139,7 @@
     customSections: [],
     brand: {},
     musicUrl: "",
-    musicVol: 0.6,
+    musicVol: 0.8,
     lat: 35.7448,
     lng: 51.3753,
     team: DEF_TEAM
@@ -165,7 +165,7 @@
     cfg.customSections = s.customSections || [];
     cfg.brand = s.brand || {};
     cfg.musicUrl = s.musicUrl || "";
-    cfg.musicVol = (s.musicVol != null && s.musicVol !== "") ? Math.max(0, Math.min(1, Number(s.musicVol))) : 0.6;
+    cfg.musicVol = (s.musicVol != null && s.musicVol !== "") ? Math.max(0, Math.min(1, Number(s.musicVol))) : 0.8;
     cfg.lat = (s.lat != null && s.lat !== "") ? Number(s.lat) : DEF_SETTINGS.lat;
     cfg.lng = (s.lng != null && s.lng !== "") ? Number(s.lng) : DEF_SETTINGS.lng;
     cfg.team = (s.team && s.team.length) ? s.team : DEF_TEAM;
@@ -280,7 +280,7 @@
     setInterval(tick, 1000);
   }
 
-  /* ===== 🎷 جَز زنده + ولوم ===== */
+  /* ===== 🎷 موسیقی: جَز زنده یا MP3 — با ولوم قوی‌تر ===== */
   var audioCtx = null, jazz = null, musicEl = null, soundOn = false;
   function mf(m){ return 440 * Math.pow(2, (m - 69) / 12); }
   var PROG = [
@@ -291,7 +291,7 @@
   ];
   function updateSoundBtn() {
     var b = document.querySelector('[data-dock="sound"]');
-    if (b) { b.classList.toggle("on", soundOn); b.setAttribute("aria-pressed", soundOn ? "true" : "false"); b.title = soundOn ? "قطع موسیقی" : "پخش جَز کافه"; }
+    if (b) { b.classList.toggle("on", soundOn); b.setAttribute("aria-pressed", soundOn ? "true" : "false"); b.title = soundOn ? "قطع موسیقی" : "پخش موسیقی کافه"; }
   }
   function tone(t, midi, dur, type, g, vib) {
     var o = audioCtx.createOscillator();
@@ -361,14 +361,15 @@
     musicEl.loop = true;
     musicEl.volume = 0;
     musicEl.play().then(function () {
+      var target = Math.min(1, vol * 1.15);
       var v = 0;
       var iv = setInterval(function () {
         v += 0.05;
-        musicEl.volume = Math.min(vol, v);
-        if (v >= vol) clearInterval(iv);
-      }, 120);
+        musicEl.volume = Math.min(target, v);
+        if (v >= target) clearInterval(iv);
+      }, 100);
     }).catch(function () {
-      toastSite("پخش موسیقی ممکن نشد؛ لینک/مسیر را بررسی کن.");
+      toastSite("پخش موسیقی ممکن نشد؛ مسیر/لینک را بررسی کن.");
       musicEl = null;
       soundOn = false;
       updateSoundBtn();
@@ -385,7 +386,7 @@
     var master = audioCtx.createGain();
     master.gain.value = 0;
     master.connect(audioCtx.destination);
-    master.gain.linearRampToValueAtTime(0.12 * vol, audioCtx.currentTime + 1.5);
+    master.gain.linearRampToValueAtTime(0.24 * vol, audioCtx.currentTime + 1.5);
     var lp = audioCtx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 5600;
     lp.connect(master);
     jazz = { master: master, out: lp, timer: null, crack: null, bar: 0, stop: false };
@@ -1162,7 +1163,7 @@
       '<a data-dock="tel" href="#" aria-label="تماس تلفنی" title="تماس">' + ICONS.tel + '</a>' +
       '<a data-dock="wa" href="#" target="_blank" rel="noopener" aria-label="واتساپ" title="واتساپ">' + ICONS.wa + '</a>' +
       '<a data-dock="ig" href="#" target="_blank" rel="noopener" aria-label="اینستاگرام" title="اینستاگرام">' + ICONS.ig + '</a>' +
-      '<button data-dock="sound" type="button" aria-label="موسیقی کافه" aria-pressed="false" title="پخش جَز کافه">' + ICONS.snd + '</button>' +
+      '<button data-dock="sound" type="button" aria-label="موسیقی کافه" aria-pressed="false" title="پخش موسیقی کافه">' + ICONS.snd + '</button>' +
       '<button data-dock="club" type="button" aria-label="باشگاه مشتریان" title="باشگاه مشتریان">' + ICONS.club + '</button>';
     document.body.appendChild(dock);
     dock.querySelector('[data-dock="club"]').addEventListener("click", openClub);
