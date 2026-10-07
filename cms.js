@@ -1,4 +1,4 @@
-// cms.js — نسخه ۳۰: دکمهٔ منوی موبایل طلایی + پنل شیشه‌ای + همه قابلیت‌ها
+// cms.js — نسخه ۳۱: فیکس پنل منوی موبایل + همه قابلیت‌ها
 (function () {
   var K_C = "cms-content-v2";
   var DEFAULT_HERO = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1400&auto=format&fit=crop";
@@ -44,7 +44,7 @@
   var EXTRA_CSS =
     '.skip{position:fixed;top:-70px;inset-inline-start:16px;z-index:99;background:var(--gold);color:var(--bg);padding:10px 18px;border-radius:2px;font-size:13px;text-decoration:none;transition:top .2s ease}' +
     '.skip:focus{top:12px}' +
-    /* ===== دکمهٔ منوی موبایل: پیل طلایی ===== */
+    /* دکمهٔ منوی موبایل: پیل طلایی */
     '.template-menu__toggle{display:inline-flex !important;align-items:center;gap:10px;' +
       'background:linear-gradient(145deg,var(--gold),var(--gold-d)) !important;color:#171310 !important;' +
       'border:0 !important;border-radius:999px !important;padding:10px 22px !important;' +
@@ -56,13 +56,18 @@
     '.template-menu__icon span{position:absolute !important;inset-inline:0 !important;height:2px !important;border-radius:2px !important;background:#171310 !important}' +
     '.template-menu__icon span:first-child{top:2px !important}' +
     '.template-menu__icon span:last-child{bottom:2px !important}' +
-    /* ===== پنل بازشو: شیشهٔ تیره طلایی ===== */
-    '.template-menu__panel{background:rgba(14,12,10,.94) !important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
-      'border:1px solid var(--gold-line) !important;border-radius:14px !important;padding:8px !important;margin-top:8px !important;' +
-      'box-shadow:0 20px 40px rgba(0,0,0,.5) !important}' +
+    /* ===== فیکس سرریز پنل منو در موبایل ===== */
+    '.siteMenu,.template-menu{position:relative !important;overflow:visible !important}' +
+    '.template-menu__panel{position:absolute !important;top:calc(100% + 10px) !important;' +
+      'left:0 !important;right:auto !important;width:240px !important;max-width:calc(100vw - 32px) !important;' +
+      'box-sizing:border-box !important;z-index:60 !important;' +
+      'background:rgba(14,12,10,.96) !important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
+      'border:1px solid var(--gold-line) !important;border-radius:14px !important;padding:8px !important;margin-top:0 !important;' +
+      'box-shadow:0 20px 40px rgba(0,0,0,.55) !important}' +
     '.template-menu__panel a{display:block;color:var(--cream) !important;text-decoration:none !important;font-size:14px !important;' +
-      'padding:10px 14px !important;border-radius:8px !important;transition:all .2s ease}' +
-    '.template-menu__panel a:hover{background:rgba(216,192,138,.14);color:var(--gold) !important}' +
+      'padding:11px 14px !important;border-radius:8px !important;border-bottom:1px solid rgba(216,192,138,.12) !important;transition:all .2s ease}' +
+    '.template-menu__panel a:last-child{border-bottom:0 !important}' +
+    '.template-menu__panel a:hover,.template-menu__panel a:active{background:rgba(216,192,138,.14);color:var(--gold) !important}' +
     '.clubStamps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}' +
     '.stamp{aspect-ratio:1;border-radius:50%;border:1px dashed var(--gold-line);display:grid;place-items:center;color:var(--faint);font-size:15px;transition:all .3s ease}' +
     '.stamp.on{border-style:solid;border-color:var(--gold);color:var(--gold);background:rgba(216,192,138,.10);box-shadow:inset 0 0 12px rgba(216,192,138,.25)}' +
@@ -164,7 +169,7 @@
     team: DEF_TEAM
   };
   var FA_WEEK = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
-  var FA_DIG = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  var FA_DIG = ["۰", "", "۲", "", "۴", "", "۶", "", "۸", ""];
 
   function faNum(n) { return String(n).replace(/\d/g, function (d) { return FA_DIG[Number(d)]; }); }
   function faTime(h) { return faNum(h) + ":۰۰"; }
@@ -277,7 +282,6 @@
     } else if (ex) ex.remove();
   }
 
-  /* برچسب فارسی روی دکمهٔ منوی موبایل */
   function relabelMobileMenu() {
     var sum = document.querySelector(".template-menu__toggle");
     if (!sum || sum.dataset.fa) return;
