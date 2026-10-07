@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>پنل مدیریت کافه</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.1/dist/font-face.css"/>
+<style>
+  *{box-sizing:border-box;margin:0}
+  :root{--bg:#171310;--panel:#1e1915;--panel2:#282219;--line:#3a322a;--txt:#f2ece2;--mut:#a89b8a;--acc:#c07a4a;--acc2:#e0b489;--bad:#f87171;--ok:#86efac}
+  body{font-family:"Shabnam",Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
+  button{font-family:inherit;cursor:pointer;border:0;border-radius:10px}
+  input,textarea,select{font-family:inherit;width:100%;min-width:0;background:#faf6ef;color:#241f1a;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+  textarea{min-height:70px;resize:vertical}
+  input:focus,textarea:focus{outline:2px solid var(--acc)}
+  input[type="checkbox"]{width:18px;height:18px;accent-color:var(--acc);cursor:pointer}
+  input[type="color"]{padding:4px;height:42px;background:var(--panel2)}
+  input[type="range"]{padding:0;height:26px;background:transparent;border:0;accent-color:var(--acc)}
+  .num{direction:ltr;text-align:left}
+  .btn{padding:9px 16px;font-size:13.5px;font-weight:600}
+  .btn.primary{background:var(--acc);color:#fff}
+  .btn.primary:hover{background:#d18a58}
+  .btn.save{padding:11px 28px;font-size:15px;box-shadow:0 4px 16px rgba(192,122,74,.4)}
+  .btn.ghost{background:var(--panel2);color:var(--mut);border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--txt)}
+  .btn.big{width:100%;padding:13px;font-size:15px}
+  .btn.ok{background:#2c5a3d;color:var(--ok);border:1px solid #3f7a54}
+  .btn.ok:hover{background:#356b49}
+  .mini{background:transparent;color:var(--mut);font-size:14px;padding:1px 6px;border-radius:7px}
+  .mini:hover{color:var(--acc2)}
+  .del{background:transparent;color:var(--bad);font-size:14px;padding:4px 8px;border-radius:8px}
+  .del:hover{background:#3a1c1c}
+  .imgBtnMini{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:13px;opacity:.7;transition:all .2s ease}
+  .imgBtnMini:hover{opacity:1}
+  .imgBtnMini.has{opacity:1;border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+  .addBtn{background:var(--panel2);color:var(--acc2);border:1px dashed var(--line);padding:9px;border-radius:10px;width:100%;font-size:13.5px}
+  .addBtn:hover{border-color:var(--acc);color:var(--txt)}
+  .switchLab{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--acc2);white-space:nowrap}
+  .tagRow{display:flex;gap:6px;flex-wrap:wrap}
+  .tagChip{background:var(--panel2);color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:11px;transition:all .15s ease}
+  .tagChip:hover{color:var(--txt)}
+  .tagChip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+  .warn{background:rgba(248,113,113,.10);border:1px solid rgba(248,113,113,.4);color:#fca5a5;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.9}
+  .qrBox{background:#fff;padding:14px;border-radius:12px;display:inline-block;margin-top:12px}
+  .qrBox canvas,.qrBox img{display:block}
+  .volRow{display:flex;align-items:center;gap:12px}
+  .volRow input{flex:1}
+  .volRow span{min-width:44px;text-align:center;color:var(--acc2);font-size:13px}
+  #app{display:none}
+  body.logged #app{display:block}
+  body.logged #login{display:none}
+  .loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 500px at 70% -10%,#3a2a1c 0%,var(--bg) 60%)}
+  .loginCard{width:350px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:34px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .logo{font-size:40px}
+  .loginCard h1{font-size:19px;margin:10px 0 4px}
+  .loginCard .sub{color:var(--mut);font-size:13px;margin-bottom:20px}
+  #err{color:var(--bad);font-size:13px;margin-top:10px;min-height:18px}
+  .topbar{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;padding:11px 20px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .brand{font-size:16px;font-weight:700}
+  .grow{flex:1}
+  .badge{background:#4a2c1c;color:var(--acc2);font-size:12px;padding:5px 10px;border-radius:20px}
+  .shell{display:flex;align-items:stretch}
+  .side{position:sticky;top:58px;height:calc(100vh - 58px);width:236px;min-width:236px;overflow-y:auto;
+    background:var(--panel);border-inline-start:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:10px}
+  .side nav{display:flex;flex-direction:column;gap:4px}
+  .side nav button{display:flex;align-items:center;gap:9px;background:transparent;color:var(--mut);padding:9px 12px;
+    border-radius:10px;font-size:13.5px;text-align:right;transition:all .2s ease;border:1px solid transparent}
+  .side nav button:hover{background:var(--panel2);color:var(--txt)}
+  .side nav button.on{background:var(--panel2);color:var(--acc2);border-color:var(--line)}
+  .sideFoot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+  main{flex:1;min-width:0;max-width:960px;margin:0 auto;padding:22px 26px 90px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:18px;overflow:hidden}
+  .card header{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .card header h3{font-size:15px;font-weight:700}
+  .rows{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+  .g2,.g3{display:grid;gap:10px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .fld.full{grid-column:1/-1}
+  .lab{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--acc2);margin-bottom:5px}
+  .thead{display:grid;gap:8px;font-size:11.5px;color:var(--mut);margin-top:4px}
+  .thead>*,.trow>*{min-width:0}
+  .trow{display:grid;gap:8px;align-items:center}
+  .ev{border:1px dashed var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .ev .tag{font-size:12px;color:var(--mut)}
+  .evItem{display:flex;flex-direction:column;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:10px}
+  .evItem:last-of-type{border-bottom:0}
+  .imgRow{display:flex;gap:14px;align-items:flex-start}
+  .thumbBox{width:92px;height:92px;min-width:92px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);
+    display:grid;place-items:center;overflow:hidden;position:relative}
+  .thumbBox img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumbBox[data-empty="1"]::after{content:"بدون تصویر";position:absolute;font-size:10px;color:var(--mut)}
+  .imgCtl{flex:1;min-width:0}
+  .imgBtns{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
+  .imgBtns label.btn,.imgBtns button{display:inline-block;font-size:12.5px;padding:7px 13px}
+  .colorsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px 18px}
+  .preview{position:fixed;top:58px;left:0;bottom:0;width:min(560px,55%);z-index:7;border-inline-end:1px solid var(--line);background:#000;box-shadow:20px 0 50px rgba(0,0,0,.5)}
+  .preview iframe{width:100%;height:100%;border:0}
+  #toast{position:fixed;bottom:24px;inset-inline-start:24px;background:var(--panel2);border:1px solid var(--line);padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;transform:translateY(12px);transition:.25s;z-index:9}
+  #toast.show{opacity:1;transform:none}
+  .hide{display:none!important}
+  .hint{font-size:12px;color:var(--mut);line-height:1.9}
+  @media(max-width:900px){
+    .shell{flex-direction:column}
+    .side{position:static;height:auto;width:100%;min-width:0;flex-direction:row;flex-wrap:wrap;border:0;border-bottom:1px solid var(--line)}
+    .side nav{flex-direction:row;flex-wrap:wrap}
+    .sideFoot{margin-top:0;border:0;flex-direction:row}
+    .preview{width:100%;top:auto;height:60%}
+  }
+</style>
+</head>
+<body>
+
+<div id="login" class="loginWrap">
+  <div class="loginCard">
+    <div class="logo">☕</div>
+    <h1>پنل مدیریت کافه</h1>
+    <p class="sub">برای ورود رمز عبور را وارد کنید</p>
+    <input id="pass" type="password" placeholder="رمز عبور"/>
+    <div style="height:12px"></div>
+    <button id="loginBtn" class="btn primary big">ورود به پنل</button>
+    <p id="err"></p>
+  </div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">☕ پنل مدیریت کافه</div>
+    <div class="grow"></div>
+    <span id="dirty" class="badge" hidden>● ذخیره‌نشده</span>
+    <button id="previewBtn" class="btn ghost">👁 پیش‌نمایش</button>
+    <button id="saveBtn" class="btn primary save">💾 ذخیره تغییرات</button>
+    <button id="outBtn" class="btn ghost">خروج</button>
+  </header>
+  <div class="shell">
+    <aside class="side">
+      <input id="search" placeholder="🔍 جست‌وجو…"/>
+      <nav id="nav"></nav>
+      <div class="sideFoot">
+        <button id="resetBtn" class="btn ghost">♻ برگشت به قالب</button>
+      </div>
+    </aside>
+    <main id="main"></main>
+  </div>
+  <section id="previewPane" class="preview" hidden><iframe id="pv" src="index.html"></iframe></section>
+</div>
+<div id="toast"></div>
+
+<script src="manifest.js"></script>
+<script src="content.js"></script>
+<script>
+var PASS = "admin123";   // ← عوضش کن
+var K_C = "cms-content-v2", K_D = "cms-draft-v2";
+var M = window.MANIFEST;
+var TAGS = ["گرم", "سرد", "گیاهی", "بدون کافئین", "پرفروش", "ویژه"];
+function deep(o){ return JSON.parse(JSON.stringify(o)); }
+
+var DEFAULT_MENU = [
+  { title: "بار گرم", sizes: "", items: [
+    { name: "اسپرسو", note: "همیشه دبل", price: "۸۵,۰۰ تومان", tags: ["گرم","پرفروش"] },
+    { name: "ماکیاتو", note: "", price: "۹۰,۰۰ تومان", tags: ["گرم"] },
+    { name: "کورتادو", note: "", price: "۹۵,۰۰ تومان", tags: ["گرم"] },
+    { name: "فلت وایت", note: "", price: "۱۰۵,۰۰ تومان", tags: ["گرم","پرفروش"] },
+    { name: "کاپوچینو", note: "", price: "۱۰,۰۰ تومان", tags: ["گرم"] },
+    { name: "لاته", note: "", price: "۱۱,۰۰ تومان", tags: ["گرم"] },
+    { name: "موکا", note: "با شکلات ۷۰٪", price: "۱۳۰,۰۰ تومان", tags: ["گرم","ویژه"] }
+  ]},
+  { title: "نوشیدنی سرد", sizes: "", items: [
+    { name: "آیس لاته", note: "", price: "۱۱,۰۰ تومان", tags: ["سرد","پرفروش"] },
+    { name: "کلد برو", note: "دم‌کرده ۱۸ ساعته", price: "۱۱۰,۰۰ تومان", tags: ["سرد"] },
+    { name: "آیس آمریکانو", note: "", price: "۹۵,۰۰ تومان", tags: ["سرد"] },
+    { name: "لیموناد نعنا", note: "بدون کافئین", price: "۸۰,۰۰ تومان", tags: ["سرد","بدون کافئین","گیاهی"] }
+  ]},
+  { title: "سالاد و غذا", sizes: "", items: [
+    { name: "سالاد سزار", note: "با مرغ و پارمزان", price: "۱۸۵,۰۰ تومان", tags: ["پرفروش"] },
+    { name: "سالاد یونانی", note: "", price: "۱۶,۰۰ تومان", tags: ["گیاهی"] },
+    { name: "ساندویچ کلاب", note: "با سیب‌زمینی", price: "۲۱۰,۰۰ تومان", tags: [] },
+    { name: "پاستا آلفردو", note: "", price: "۲۴۰,۰۰ تومان", tags: ["گیاهی"] }
+  ]}
+];
+var DEF_TEAM = [
+  { name: "سارا", role: "باریستای سرپرست", line: "مسئول اینکه لاته‌ات قلب داشته باشد" },
+  { name: "آرمان", role: "استاد بوداده", line: "هر دانه را از اسمش می‌شناسد" },
+  { name: "نیکا", role: "میزبان خانه", line: "سفارش همیشگی‌ات را از بر است" }
+];
+
+var DIG = "0-9\\u06F0-\\u06F9\\u0660-\\u0669";
+var RUN_RE = new RegExp("[" + DIG + "][" + DIG + ",،٬]*", "g");
+function groupDigits(str){
+  return String(str).replace(RUN_RE, function(run){
+    var clean = run.replace(/[,،٬]/g, "");
+    if (clean.length < 4) return run;
+    var out = "", count = 0;
+    for (var i = clean.length - 1; i >= 0; i--) {
+      out = clean.charAt(i) + out; count++;
+      if (count % 3 === 0 && i > 0) out = "," + out;
+    }
+    return out;
+  });
+}
+function wirePrice(inp){
+  inp.classList.add("price");
+  inp.value = groupDigits(inp.value);
+  inp.addEventListener("input", function(){
+    var v = groupDigits(inp.value);
+    if (v !== inp.value) inp.value = v;
+  });
+}
+
+var IMG_SLOTS = [
+  ["img.logo", "لوگوی برند (بالای ستون هدر)"],
+  ["img.hero", "تصویر هدر (ستون راست)"],
+  ["img.sig.0", "نوشیدنی امضایی ۱"],
+  ["img.sig.1", "نوشیدنی امضایی ۲"],
+  ["img.sig.2", "نوشیدنی امضایی ۳"],
+  ["img.story", "تصویر بخش قصه ما"],
+  ["img.booking", "تصویر فضای کافه (بخش رزرو)"],
+  ["img.team.0", "عکس عضو ۱ تیم"],
+  ["img.team.1", "عکس عضو ۲ تیم"],
+  ["img.team.2", "عکس عضو ۳ تیم"],
+  ["img.gal.0", "گالری ۱"],
+  ["img.gal.1", "گالری ۲"],
+  ["img.gal.2", "گالری ۳"],
+  ["img.gal.3", "گالری ۴"],
+  ["img.gal.4", "گالری ۵"],
+  ["img.gal.5", "گالری ۶"]
+];
+
+var DEF_SETTINGS = {
+  tel: "tel:+982188888888",
+  whatsapp: "https://wa.me/989120000000",
+  instagram: "https://instagram.com/yourcafe",
+  hours: [
+    { o: 7, c: 22 }, { o: 7, c: 22 }, { o: 7, c: 22 }, { o: 7, c: 22 },
+    { o: 7, c: 22 }, { o: 9, c: 23 }, { o: 7, c: 23 }
+  ],
+  specials: [
+    "ویژه امروز: قهوه دارچین و هل", "ویژه امروز: کلد برو پرتقال", "ویژه امروز: موکای فندق",
+    "ویژه امروز: لاته زعفرونی", "ویژه امروز: کلد برو نارگیل", "ویژه امروز: شات خرما و گردو",
+    "ویژه امروز: لاته عسل و گلاب"
+  ],
+  sectionsOff: {},
+  customSections: [],
+  brand: {},
+  musicUrl: "",
+  musicVol: 0.6,
+  lat: 35.7448,
+  lng: 51.3753,
+  team: DEF_TEAM
+};
+var FA_WEEK = ["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+var WEEK_ORDER = [6,0,1,2,3,4,5];
+
+var edits = JSON.parse(JSON.stringify(window.CONTENT || {}));
+var draftLoaded = false;
+try {
+  var lc = localStorage.getItem(K_C);
+  if (lc){ var pc = JSON.parse(lc); if (pc && typeof pc === "object") edits = pc; }
+} catch(e){}
+["site","text","images","colors"].forEach(function(k){ edits[k] = edits[k] || {}; });
+try {
+  var ld = localStorage.getItem(K_D);
+  if (ld){
+    var pd = JSON.parse(ld);
+    if (pd && pd.edits){
+      edits = pd.edits;
+      ["site","text","images","colors"].forEach(function(k){ edits[k] = edits[k] || {}; });
+      draftLoaded = true;
+    }
+  }
+} catch(e){}
+if (!edits.story) edits.story = deep(M.story || {title:"",intro:"",timeline:[]});
+if (!edits.reviews) edits.reviews = deep(M.reviews || {title:"",items:[]});
+if (!edits.settings) edits.settings = deep(DEF_SETTINGS);
+edits.settings.sectionsOff = edits.settings.sectionsOff || {};
+edits.settings.customSections = edits.settings.customSections || [];
+edits.settings.brand = edits.settings.brand || {};
+edits.settings.team = (edits.settings.team && edits.settings.team.length) ? edits.settings.team : deep(DEF_TEAM);
+if (edits.settings.musicVol == null) edits.settings.musicVol = 0.6;
+var MD = deep(edits.menu || M.menu || []);
+var dirty = false, dirHandle = null, pvTimer = null;
+
+var SECTIONS = [
+  ["site","🌐","سایت"], ["settings","⚙️","تنظیمات و تماس"], ["brand","🎨","برند من"],
+  ["qr","📱","QR منو"], ["sections","🧩","بخش‌های سایت"],
+  ["images","🖼","تصویرها و بارگذاری"], ["top","⭐","معرفی"], ["left","🏠","سربرگ"],
+  ["menu","☕","منو"], ["story","📖","قصه"], ["reviews","💬","نظرها"], ["team","👥","تیم ما"],
+  ["beans","🫘","دانه‌ها"], ["subscriptions","📦","اشتراک"], ["wholesale","🏪","عمده"],
+  ["events","📅","رویدادها"], ["visit","📍","ساعت/آدرس"], ["footer","📄","پاورقی"], ["colors","🎨","رنگ‌ها"]
+];
+var ML = /tagline|secNote|intro|eventWhen|eventDetail|planWhat|planPrice|beanOrigin|beanNotes|body|fine|quote/;
+function isML(k,v){ return ML.test(k) || String(v).indexOf("\n") > -1; }
+function el(t,c,x){
+  var n=document.createElement(t);
+  if(c)n.className=c;
+  if(x!=null){
+    if (typeof x === "object") n.appendChild(x);
+    else n.textContent = x;
+  }
+  return n;
+}
+function labelFor(k){
+  var p=k.split("."), n2=Number(p[2])+1, n3=Number(p[3])+1;
+  var sp={"top.intro":"متن معرفی","left.name":"نام سایت","left.tagline":"شعار سایت","left.text":"وضعیت باز/بسته",
+    "menu.fine":"پانوشت منو","menu.title":"عنوان بخش منو","visit.body":"آدرس و مکان","visit.label":"عنوان جعبه ساعت","visit.label2":"عنوان جعبه آدرس",
+    "wholesale.text":"جمله تماس","wholesale.link":"ایمیل عمده","visit.link":"تلفن","visit.link2":"ایمیل کافه",
+    "footer.footName":"نام پاورقی","footer.body":"متن پاورقی","footer.link":"لینک پاورقی","subscriptions.button":"متن دکمه اشتراک",
+    "story.title":"عنوان بخش قصه","story.intro":"متن معرفی قصه","reviews.title":"عنوان بخش نظرها"};
+  if (sp[p[0]+"."+p[1]]) return sp[p[0]+"."+p[1]];
+  var g={"link":"لینک سربرگ "+n2,"link2":"لینک موبایل "+n2,"term":"عنوان "+n2,"body":"متن "+n2,"term2":"عنوان "+n2,"body2":"متن "+n2,
+    "secNo":"شماره بخش","title":"عنوان بخش","secNote":"توضیح بخش","title2":"زیرعنوان "+n2,"sizes":"اندازه‌ها "+n2,
+    "itemName":"نام آیتم "+n2+" ردیف "+n3,"itemNote":"یادداشت "+n2+"-"+n3,"itemPrice":"قیمت "+n2+"-"+n3,
+    "beanOrigin":"خاستگاه "+n2,"beanNotes":"طعم "+n2,"roastLabel":"بوداده "+n2,"beanPrice":"قیمت "+n2,
+    "planWhat":"توضیح پلن "+n2,"planPrice":"قیمت پلن "+n2,"item":"قاعده "+n2,
+    "dateDay":"روز "+n2,"dateMonth":"ماه "+n2,"eventWhen":"زمان "+n2,"eventDetail":"توضیح "+n2};
+  return g[p[1]] || k;
+}
+function cur(kind,k){
+  if (edits[kind].hasOwnProperty(k)) return edits[kind][k];
+  if (M[kind] && M[kind][k] != null) return M[kind][k];
+  return "";
+}
+function effective(){
+  var out={site:{},text:{},images:{},colors:{},menu:deep(MD),story:deep(edits.story),reviews:deep(edits.reviews),settings:deep(edits.settings)};
+  ["site","text","images","colors"].forEach(function(kind){
+    Object.keys(M[kind]).forEach(function(k){ out[kind][k]=cur(kind,k); });
+    Object.keys(edits[kind]).forEach(function(k){ out[kind][k]=edits[kind][k]; });
+  });
+  return out;
+}
+function draft(){ try{ localStorage.setItem(K_D, JSON.stringify({edits:edits, menu:MD})); }catch(e){} }
+function touch(){ dirty=true; document.getElementById("dirty").hidden=false; draft(); preview(); }
+function toast(m){ var t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},2600); }
+
+/* نوشتن فایل موزیک داخل پوشه پروژه: media/music.mp3 */
+async function placeMusic(file){
+  try{
+    if(!dirHandle) dirHandle = await window.showDirectoryPicker({mode:"readwrite"});
+    var mediaDir = await dirHandle.getDirectoryHandle("media", {create:true});
+    var fh = await mediaDir.getFileHandle("music.mp3", {create:true});
+    var w = await fh.createWritable();
+    await w.write(file);
+    await w.close();
+    return true;
+  }catch(e){ return false; }
+}
+
+function start(){
+  document.body.classList.add("logged");
+  buildNav(); renderAll();
+  if (draftLoaded) toast("📋 پیش‌نویس ذخیره‌نشده‌ات برگردانده شد.");
+}
+document.getElementById("loginBtn").onclick=function(){
+  if (document.getElementById("pass").value===PASS){ sessionStorage.setItem("cms","1"); start(); }
+  else document.getElementById("err").textContent="رمز اشتباه است!";
+};
+document.getElementById("pass").addEventListener("keydown",function(e){ if(e.key==="Enter") document.getElementById("loginBtn").onclick(); });
+document.getElementById("outBtn").onclick=function(){ sessionStorage.removeItem("cms"); location.reload(); };
+if (sessionStorage.getItem("cms")==="1") start();
+
+function buildNav(){
+  var w=document.getElementById("nav"); w.innerHTML="";
+  SECTIONS.forEach(function(s){
+    var b=el("button",null,null);
+    b.appendChild(el("span",null,s[1]));
+    b.appendChild(el("span",null,s[2]));
+    b.onclick=function(){
+      var c=document.getElementById("card-"+s[0]);
+      if(c)c.scrollIntoView({behavior:"smooth",block:"start"});
+      var all=w.querySelectorAll("button");
+      for(var i=0;i<all.length;i++)all[i].classList.remove("on");
+      b.classList.add("on");
+    };
+    w.appendChild(b);
+  });
+}
+
+function fld(kind,k,label,full){
+  var v=cur(kind,k);
+  var d=el("div","fld"+(full?" full":"")); d.dataset.label=(label+" "+k).toLowerCase();
+  var lab=el("div","lab"); lab.appendChild(el("span","",label));
+  var rs=el("button","mini","↺"); rs.title="برگشت به قالب"; rs.hidden=!edits[kind].hasOwnProperty(k);
+  lab.appendChild(rs); d.appendChild(lab);
+  var inp=isML(k,v)?el("textarea"):el("input"); if(inp.tagName==="INPUT")inp.type="text";
+  inp.value=v;
+  inp.oninput=function(){ edits[kind][k]=inp.value; rs.hidden=false; touch(); };
+  rs.onclick=function(){ delete edits[kind][k]; inp.value=(M[kind]&&M[kind][k]!=null)?M[kind][k]:""; rs.hidden=true; touch(); };
+  d.appendChild(inp); return d;
+}
+function g(cls){ var d=el("div",cls); for(var i=1;i<arguments.length;i++)d.appendChild(arguments[i]); return d; }
+function card(id,icon,title){
+  var c=el("section","card"); c.id="card-"+id;
+  var h=el("header"); h.appendChild(el("span","",icon)); h.appendChild(el("h3","",title));
+  c.appendChild(h); return c;
+}
+function table(head,cols){
+  var th=el("div","thead"); th.style.gridTemplateColumns=cols;
+  head.forEach(function(t){ th.appendChild(el("span","",t)); });
+  return th;
+}
+
+/* ===== 🎨 برند ===== */
+function brandCard(){
+  var c=card("brand","🎨","برند من"), b=el("div","rows"), B=edits.settings.brand;
+  b.appendChild(el("p","hint","رنگ‌های برند و لوگو را ست کن؛ کل سایت زنده عوض می‌شود و با ذخیره می‌ماند. لوگو در کارت «تصویرها» بارگذاری می‌شود."));
+  function cf(key,label,def){
+    var d=el("div","fld"); d.dataset.label=("برند "+label).toLowerCase();
+    d.appendChild(el("div","lab",el("span","",label)));
+    var inp=el("input"); inp.type="color"; inp.value=B[key]||def;
+    inp.oninput=function(){ B[key]=inp.value; touch(); };
+    d.appendChild(inp); return d;
+  }
+  b.appendChild(g("g3", cf("gold","رنگ اصلی (طلایی)","#d8c08a"), cf("copper","رنگ ثانویه (مسی)","#c08552"), cf("bg","پس‌زمینه","#0e0c0a")));
+  var clr=el("button","btn ghost","♻ برگشت به رنگ‌های پیش‌فرض");
+  clr.onclick=function(){ edits.settings.brand={}; renderAll(); touch(); toast("رنگ‌ها به پیش‌فرض برگشت؛ ذخیره کن."); };
+  b.appendChild(clr);
+  c.appendChild(b); return c;
+}
+
+/* ===== 📱 QR ===== */
+function qrCard(){
+  var c=card("qr","📱","QR کد منو"), b=el("div","rows");
+  b.appendChild(el("p","hint","آدرس سایت مشتری (مثلاً آدرس Netlify/Vercel) را بنویس، QR بساز و PNG بگیر برای چاپ روی میز. اگر لوگو بارگذاری شده باشد، وسط QR می‌نشیند."));
+  var urlInp=el("input"); urlInp.type="text"; urlInp.placeholder="https://cafe-domain.ir";
+  urlInp.value=edits.settings.qrUrl||"";
+  urlInp.oninput=function(){ edits.settings.qrUrl=urlInp.value; };
+  b.appendChild(urlInp);
+  var box=el("div","qrBox"); box.id="qrBox"; box.style.display="none";
+  var btnRow=el("div","imgBtns");
+  var gen=el("button","btn primary","ساخت QR کد");
+  var dl=el("button","btn ghost","⬇ دانلود PNG");
+  btnRow.appendChild(gen); btnRow.appendChild(dl);
+  b.appendChild(btnRow); b.appendChild(box);
+  function loadLib(cb){
+    if (window.QRCode) { cb(); return; }
+    var s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+    s.onload=function(){ cb(); };
+    s.onerror=function(){ toast("اتصال اینترنت برای کتابخانه QR لازم است."); };
+    document.body.appendChild(s);
+  }
+  function overlayLogo(){
+    var cv=box.querySelector("canvas");
+    var logoSrc=edits.images["img.logo"];
+    if(!cv||!logoSrc) return;
+    var im=new Image();
+    im.onload=function(){
+      var ctx=cv.getContext("2d");
+      var s=cv.width*0.24;
+      var x=(cv.width-s)/2;
+      ctx.fillStyle="#ffffff";
+      ctx.fillRect(x-6,x-6,s+12,s+12);
+      ctx.drawImage(im,x,x,s,s);
+    };
+    im.src=logoSrc;
+  }
+  gen.onclick=function(){
+    var url=urlInp.value.trim();
+    if(!url){ toast("اول آدرس را بنویس."); return; }
+    loadLib(function(){
+      box.style.display="inline-block";
+      box.innerHTML="";
+      new QRCode(box,{text:url,width:260,height:260,colorDark:"#241f1a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+      setTimeout(overlayLogo,350);
+      toast("✅ QR آماده شد.");
+    });
+  };
+  dl.onclick=function(){
+    var cv=box.querySelector("canvas");
+    if(!cv){ toast("اول QR را بساز."); return; }
+    var a=document.createElement("a");
+    a.href=cv.toDataURL("image/png");
+    a.download="menu-qr.png";
+    a.click();
+  };
+  c.appendChild(b); return c;
+}
+
+/* ===== 👥 تیم ===== */
+function teamCard(){
+  var c=card("team","👥","تیم ما"), b=el("div","rows"), T=edits.settings.team;
+  b.appendChild(el("p","hint","سه عضو تیم؛ عکس‌ها در کارت «تصویرها» (اسلات‌های تیم) بارگذاری می‌شوند."));
+  T.forEach(function(m,i){
+    var box=el("div","ev"); box.dataset.label=("عضو تیم "+(i+1)).toLowerCase();
+    box.appendChild(el("div","tag","عضو "+(i+1)));
+    var r=el("div","g3");
+    [["name","نام"],["role","نقش"],["line","یک خط درباره‌اش"]].forEach(function(f){
+      var inp=el("input"); inp.type="text"; inp.placeholder=f[1]; inp.value=m[f[0]]||"";
+      inp.oninput=function(){ m[f[0]]=inp.value; touch(); };
+      r.appendChild(inp);
+    });
+    box.appendChild(r);
+    b.appendChild(box);
+  });
+  c.appendChild(b); return c;
+}
+
+/* ===== 🖼 تصویرها ===== */
+function imagesCard(){
+  var c=card("images","🖼","تصویرها و بارگذاری"), b=el("div","rows");
+  b.appendChild(el("p","hint","تصویر هر جا را این‌جا بارگذاری کن: لوگو، هدر، امضایی‌ها، قصه، رزرو، تیم و شش اسلات گالری. برای پیش‌نمایش شناورِ منو، هر آیتم در کارت «منو» دکمهٔ 📷 دارد."));
+  IMG_SLOTS.forEach(function(sl){
+    var key=sl[0];
+    var row=el("div","row imgRow"); row.dataset.label=("تصویر "+sl[1]).toLowerCase();
+    var box=el("div","thumbBox");
+    var th=el("img");
+    box.appendChild(th);
+    function paint(){
+      var v=edits.images[key]||"";
+      if(v){ th.src=v; box.removeAttribute("data-empty"); }
+      else { th.removeAttribute("src"); box.setAttribute("data-empty","1"); }
+    }
+    paint();
+    var ctl=el("div","imgCtl");
+    ctl.appendChild(el("div","lab",el("span","",sl[1])));
+    var inp=el("input"); inp.type="text"; inp.value=edits.images[key]||""; inp.placeholder="آدرس تصویر یا base64";
+    inp.oninput=function(){ edits.images[key]=inp.value; paint(); touch(); };
+    ctl.appendChild(inp);
+    var btns=el("div","imgBtns");
+    var up=el("label","btn ghost","⬆ بارگذاری تصویر");
+    var fi=el("input"); fi.type="file"; fi.accept="image/*"; fi.hidden=true;
+    fi.onchange=function(){
+      if(!fi.files[0])return;
+      var r=new FileReader();
+      r.onload=function(){ edits.images[key]=r.result; inp.value=r.result; paint(); touch(); toast("🖼 تصویر آماده شد؛ ذخیره کن."); };
+      r.readAsDataURL(fi.files[0]);
+    };
+    up.appendChild(fi); btns.appendChild(up);
+    var clr=el("button","btn ghost","✖ حذف تصویر");
+    clr.onclick=function(){ edits.images[key]=""; inp.value=""; paint(); touch(); };
+    btns.appendChild(clr);
+    ctl.appendChild(btns);
+    row.appendChild(box); row.appendChild(ctl);
+    b.appendChild(row);
+  });
+  c.appendChild(b); return c;
+}
+
+/* ===== 🧩 بخش‌ها ===== */
+function replaceSectionsCard(){ var o=document.getElementById("card-sections"); if(o)o.replaceWith(sectionsCard()); }
+function sectionsCard(){
+  var c=card("sections","🧩","بخش‌های سایت"), b=el("div","rows"), S=edits.settings;
+  b.appendChild(el("p","hint","با کلید هر بخش، آن را از سایت حذف یا برگردان (شماره بخش‌ها خودکار دوباره چیده می‌شود). بخش سفارشی جدید قبل از «اشتراک» می‌نشیند."));
+  var base=[["menu","منو"],["beans","دانه‌ها"],["subscriptions","اشتراک"],["wholesale","عمده"],["events","رویدادها"],["team","تیم ما"],["gallery","گالری"],["visit","ساعت/آدرس"],["story","قصه ما"],["reviews","نظرات"],["signature","نوشیدنی‌های امضایی"]];
+  base.forEach(function(bs){
+    var row=el("div","trow"); row.style.gridTemplateColumns="1fr 150px";
+    row.dataset.label=("بخش "+bs[1]).toLowerCase();
+    row.appendChild(el("div","lab",el("span","",bs[1])));
+    var lab=el("label","switchLab");
+    var cb=el("input"); cb.type="checkbox"; cb.checked=!S.sectionsOff[bs[0]];
+    var txt=el("span","",cb.checked?"نمایش در سایت":"پنهان از سایت");
+    cb.onchange=function(){ S.sectionsOff[bs[0]]=!cb.checked; txt.textContent=cb.checked?"نمایش در سایت":"پنهان از سایت"; touch(); };
+    lab.appendChild(cb); lab.appendChild(txt);
+    row.appendChild(lab);
+    b.appendChild(row);
+  });
+  b.appendChild(el("div","lab",el("span","","بخش‌های سفارشی تو")));
+  S.customSections.forEach(function(cs,ci){
+    var box=el("div","ev"); box.dataset.label=("بخش سفارشی "+(cs.title||"")).toLowerCase();
+    var head=el("div","trow"); head.style.gridTemplateColumns="1fr 120px 40px";
+    var ti=el("input"); ti.type="text"; ti.value=cs.title||""; ti.placeholder="عنوان بخش";
+    ti.oninput=function(){ cs.title=ti.value; touch(); };
+    var lab2=el("label","switchLab");
+    var cb2=el("input"); cb2.type="checkbox"; cb2.checked=!cs.off;
+    var txt2=el("span","",cb2.checked?"نمایش":"پنهان");
+    cb2.onchange=function(){ cs.off=!cb2.checked; txt2.textContent=cb2.checked?"نمایش":"پنهان"; touch(); };
+    lab2.appendChild(cb2); lab2.appendChild(txt2);
+    var del=el("button","del","🗑"); del.title="حذف کامل این بخش";
+    del.onclick=function(){ if(!confirm("بخش «"+(cs.title||"")+"» کامل حذف شود؟"))return; S.customSections.splice(ci,1); touch(); replaceSectionsCard(); };
+    head.appendChild(ti); head.appendChild(lab2); head.appendChild(del);
+    box.appendChild(head);
+    var ta=el("textarea"); ta.value=cs.body||""; ta.placeholder="متن بخش…";
+    ta.oninput=function(){ cs.body=ta.value; touch(); };
+    box.appendChild(ta);
+    b.appendChild(box);
+  });
+  var add=el("button","addBtn","+ افزودن بخش جدید");
+  add.onclick=function(){ S.customSections.push({id:Date.now(), title:"بخش جدید", body:"", off:false}); touch(); replaceSectionsCard(); };
+  b.appendChild(add);
+  c.appendChild(b); return c;
+}
+
+/* ===== ⚙️ تنظیمات (با ولوم و موزیک) ===== */
+function settingsCard(){
+  var c=card("settings","⚙️","تنظیمات و تماس"), b=el("div","rows"), S=edits.settings;
+  b.appendChild(el("p","hint","ساعت‌ها ۲۴ساعته‌اند (22 یعنی ۱۰ شب). موسیقی: خالی = جَز زندهٔ داخلی؛ با آپلود MP3 فایل داخل پوشهٔ پروژه (media/music.mp3) قرار می‌گیرد و برای همهٔ بازدیدکننده‌ها پخش می‌شود. ولوم روی هر دو حالت اثر دارد."));
+  function sf(key,label,ph){
+    var d=el("div","fld"); d.dataset.label=("تنظیمات "+label).toLowerCase();
+    d.appendChild(el("div","lab",el("span","",label)));
+    var inp=el("input"); inp.type="text"; inp.value=S[key]!=null?S[key]:""; inp.placeholder=ph||"";
+    inp.oninput=function(){ S[key]=inp.value; touch(); };
+    d.appendChild(inp); return d;
+  }
+  b.appendChild(g("g3", sf("tel","لینک تلفن","tel:+9821..."), sf("whatsapp","لینک واتساپ","https://wa.me/989..."), sf("instagram","لینک اینستاگرام","https://instagram.com/...")));
+
+  /* ردیف موسیقی + ولوم */
+  var mRow=el("div","fld full"); mRow.dataset.label="تنظیمات موسیقی";
+  mRow.appendChild(el("div","lab",el("span","","موسیقی کافه (MP3) — خالی یعنی جَز زنده")));
+  var mInp=el("input"); mInp.type="text"; mInp.value=S.musicUrl||""; mInp.placeholder="media/music.mp3 یا https://… یا خالی";
+  mInp.oninput=function(){ S.musicUrl=mInp.value; touch(); };
+  mRow.appendChild(mInp);
+  var mBtns=el("div","imgBtns");
+  var mUp=el("label","btn ghost","⬆ آپلود MP3 (ذخیره در media/)");
+  var mFi=el("input"); mFi.type="file"; mFi.accept="audio/*"; mFi.hidden=true;
+  mFi.onchange=function(){
+    var f=mFi.files[0]; if(!f) return;
+    placeMusic(f).then(function(ok){
+      if(ok){
+        S.musicUrl="media/music.mp3"; mInp.value="media/music.mp3"; touch();
+        toast("🎵 موزیک در media/music.mp3 نشست؛ با سایت منتشر می‌شود و برای همه پخش می‌شود.");
+      } else {
+        if(f.size > 3*1024*1024){ toast("⚠ نوشتن روی پوشه ممکن نشد؛ فایل بزرگ‌تر از ۳MB است و embed پیشنهاد نمی‌شود. دوباره با انتخاب پوشهٔ سایت امتحان کن."); return; }
+        var r=new FileReader();
+        r.onload=function(){ S.musicUrl=r.result; mInp.value="(embed شده در فایل)"; touch(); toast("🎵 موزیک embed شد؛ بهتر است بعداً در media/ قرار گیرد."); };
+        r.readAsDataURL(f);
+      }
+    });
+  };
+  mUp.appendChild(mFi); mBtns.appendChild(mUp);
+  var mClr=el("button","btn ghost","✖ حذف موسیقی");
+  mClr.onclick=function(){ S.musicUrl=""; mInp.value=""; touch(); };
+  mBtns.appendChild(mClr);
+  mRow.appendChild(mBtns);
+  var vWrap=el("div","volRow");
+  var vInp=el("input"); vInp.type="range"; vInp.min="0"; vInp.max="100";
+  vInp.value=Math.round((S.musicVol!=null?S.musicVol:0.6)*100);
+  var vLab=el("span","",vInp.value+"٪");
+  vInp.oninput=function(){ S.musicVol=vInp.value/100; vLab.textContent=vInp.value+"٪"; touch(); };
+  vWrap.appendChild(el("div","lab",el("span","","میزان صدا")));
+  vWrap.appendChild(vInp); vWrap.appendChild(vLab);
+  mRow.appendChild(vWrap);
+  b.appendChild(mRow);
+
+  b.appendChild(g("g2", sf("lat","عرض جغرافیایی (lat)","35.7448"), sf("lng","طول جغرافیایی (lng)","51.3753")));
+  b.appendChild(el("div","lab",el("span","","ساعت کاری هر روز")));
+  b.appendChild(table(["روز","باز شدن","بسته شدن"],"1fr 110px 110px"));
+  WEEK_ORDER.forEach(function(di){
+    var r=el("div","trow"); r.style.gridTemplateColumns="1fr 110px 110px";
+    r.dataset.label=("ساعت کاری "+FA_WEEK[di]).toLowerCase();
+    r.appendChild(el("div","lab",el("span","",FA_WEEK[di])));
+    var oi=el("input","num"); oi.type="number"; oi.min="0"; oi.max="23"; oi.value=S.hours[di].o;
+    oi.oninput=function(){ S.hours[di].o=Math.max(0,Math.min(23,Number(oi.value)||0)); touch(); };
+    var ci=el("input","num"); ci.type="number"; ci.min="0"; ci.max="23"; ci.value=S.hours[di].c;
+    ci.oninput=function(){ S.hours[di].c=Math.max(0,Math.min(23,Number(ci.value)||0)); touch(); };
+    r.appendChild(oi); r.appendChild(ci);
+    b.appendChild(r);
+  });
+  b.appendChild(el("div","lab",el("span","","ویژه هر روز")));
+  WEEK_ORDER.forEach(function(di){
+    var d=el("div","fld"); d.dataset.label=("ویژه "+FA_WEEK[di]).toLowerCase();
+    d.appendChild(el("div","lab",el("span","","ویژه "+FA_WEEK[di])));
+    var inp=el("input"); inp.type="text"; inp.value=S.specials[di]||"";
+    inp.oninput=function(){ S.specials[di]=inp.value; touch(); };
+    d.appendChild(inp); b.appendChild(d);
+  });
+  c.appendChild(b); return c;
+}
+
+/* ===== منو ===== */
+function syncMenu(){ edits.menu = deep(MD); touch(); }
+function replaceMenuCard(){ var old=document.getElementById("card-menu"); if(old) old.replaceWith(menuCard()); }
+function menuCard(){
+  var c=card("menu","☕","منو و دسته‌بندی‌ها"), b=el("div","rows");
+  if (!MD.length) {
+    var warn=el("div","warn");
+    warn.textContent="منوی سایت الان خالی است! با دکمه زیر منوی پیشنهادی را برگردان یا دسته‌های خودت را بساز.";
+    b.appendChild(warn);
+    var fix=el("button","btn ok","♻ برگرداندن منوی پیشنهادی (بار گرم / سرد / غذا)");
+    fix.onclick=function(){ MD = deep(DEFAULT_MENU); syncMenu(); replaceMenuCard(); toast("✅ منوی پیشنهادی برگشت؛ حالا ذخیره کن."); };
+    b.appendChild(fix);
+  }
+  b.appendChild(fld("text","menu.title","عنوان بخش منو",true));
+  b.appendChild(el("p","hint","زیر هر آیتم: برچسب‌ها (فیلترها) و دکمهٔ  (پیش‌نمایش شناور هاور). کلیک دوباره روی 📷 = حذف تصویر."));
+  MD.forEach(function(cat,ci){
+    var box=el("div","ev"); box.dataset.label=("دسته منو "+(ci+1)+" "+(cat.title||"")).toLowerCase();
+    var head=el("div","trow"); head.style.gridTemplateColumns="1fr 1fr 40px";
+    var ti=el("input"); ti.type="text"; ti.value=cat.title||""; ti.placeholder="نام دسته (مثلاً بار گرم)";
+    ti.oninput=function(){ cat.title=ti.value; syncMenu(); };
+    var si=el("input"); si.type="text"; si.value=cat.sizes||""; si.placeholder="اندازه‌ها (اختیاری)";
+    si.oninput=function(){ cat.sizes=si.value; syncMenu(); };
+    var del=el("button","del","🗑"); del.title="حذف این دسته";
+    del.onclick=function(){ if(!confirm("دسته «"+(cat.title||"")+"» با همه آیتم‌هایش حذف شود؟"))return; MD.splice(ci,1); syncMenu(); replaceMenuCard(); };
+    head.appendChild(ti); head.appendChild(si); head.appendChild(del);
+    box.appendChild(head);
+    box.appendChild(table(["نام","یادداشت","قیمت (تومان)","📷",""],"1fr 1.2fr 150px 44px 40px"));
+    (cat.items||[]).forEach(function(it,ii){
+      var wrap=el("div","evItem");
+      var r=el("div","trow"); r.style.gridTemplateColumns="1fr 1.2fr 150px 44px 40px";
+      r.dataset.label=("ایتم منو "+(it.name||"")).toLowerCase();
+      var ni=el("input"); ni.type="text"; ni.value=it.name||""; ni.placeholder="نام";
+      ni.oninput=function(){ it.name=ni.value; syncMenu(); };
+      var oi=el("input"); oi.type="text"; oi.value=it.note||""; oi.placeholder="یادداشت";
+      oi.oninput=function(){ it.note=oi.value; syncMenu(); };
+      var pi=el("input","num"); pi.type="text"; pi.value=it.price||""; pi.placeholder="۸۵,۰۰۰";
+      pi.oninput=function(){ it.price=pi.value; syncMenu(); };
+      wirePrice(pi);
+      var imgKey = "img.menu." + ci + "." + ii;
+      var ib=el("button","imgBtnMini"+(edits.images[imgKey]?" has":"")); ib.type="button"; ib.textContent="📷";
+      ib.title="تصویر این آیتم (پیش‌نمایش هاور در سایت)";
+      ib.onclick=function(){
+        if (edits.images[imgKey]) {
+          if (confirm("تصویر این آیتم حذف شود؟")) { edits.images[imgKey]=""; ib.classList.remove("has"); touch(); }
+          return;
+        }
+        var fi=document.createElement("input"); fi.type="file"; fi.accept="image/*";
+        fi.onchange=function(){
+          if(!fi.files[0])return;
+          var r=new FileReader();
+          r.onload=function(){ edits.images[imgKey]=r.result; ib.classList.add("has"); touch(); toast("📷 تصویر آیتم ثبت شد؛ ذخیره کن."); };
+          r.readAsDataURL(fi.files[0]);
+        };
+        fi.click();
+      };
+      var xd=el("button","del","✖"); xd.title="حذف این آیتم";
+      xd.onclick=function(){ cat.items.splice(ii,1); syncMenu(); replaceMenuCard(); };
+      r.appendChild(ni); r.appendChild(oi); r.appendChild(pi); r.appendChild(ib); r.appendChild(xd);
+      wrap.appendChild(r);
+      var tagRow=el("div","tagRow");
+      TAGS.forEach(function(tg){
+        var onNow=(it.tags||[]).indexOf(tg)>-1;
+        var tb=el("button","tagChip"+(onNow?" on":"")); tb.type="button"; tb.textContent=tg;
+        tb.onclick=function(){
+          it.tags=it.tags||[];
+          var ix=it.tags.indexOf(tg);
+          if(ix>-1) it.tags.splice(ix,1); else it.tags.push(tg);
+          tb.classList.toggle("on");
+          syncMenu();
+        };
+        tagRow.appendChild(tb);
+      });
+      wrap.appendChild(tagRow);
+      box.appendChild(wrap);
+    });
+    var add=el("button","addBtn","+ افزودن آیتم به این دسته");
+    add.onclick=function(){ cat.items=cat.items||[]; cat.items.push({name:"آیتم جدید",note:"",price:"۰ تومان",tags:[]}); syncMenu(); replaceMenuCard(); };
+    box.appendChild(add);
+    b.appendChild(box);
+  });
+  var addCat=el("button","addBtn","+ افزودن دسته جدید");
+  addCat.onclick=function(){ MD.push({title:"دسته جدید",sizes:"",items:[{name:"آیتم نمونه",note:"",price:"۰ تومان",tags:[]}]}); syncMenu(); replaceMenuCard(); };
+  b.appendChild(addCat);
+  b.appendChild(fld("text","menu.fine","پانوشت منو",true));
+  c.appendChild(b); return c;
+}
+
+/* ===== قصه / نظرها ===== */
+function replaceStory(){ var o=document.getElementById("card-story"); if(o)o.replaceWith(storyCard()); }
+function storyCard(){
+  var c=card("story","📖","قصه ما"), b=el("div","rows"), S=edits.story;
+  b.appendChild(fld("story","title","عنوان بخش",true));
+  b.appendChild(fld("story","intro","متن معرفی قصه",true));
+  b.appendChild(table(["سال / برچسب","اتفاق",""],"110px 1fr 40px"));
+  (S.timeline||[]).forEach(function(t,ti){
+    var r=el("div","trow"); r.style.gridTemplateColumns="110px 1fr 40px";
+    r.dataset.label=("مرحله قصه "+(ti+1)+" "+(t.year||"")).toLowerCase();
+    var yi=el("input"); yi.type="text"; yi.value=t.year||""; yi.placeholder="سال";
+    yi.oninput=function(){ t.year=yi.value; touch(); };
+    var xi=el("input"); xi.type="text"; xi.value=t.text||""; xi.placeholder="آن سال چه اتفاقی افتاد؟";
+    xi.oninput=function(){ t.text=xi.value; touch(); };
+    var xd=el("button","del","✖"); xd.title="حذف این مرحله";
+    xd.onclick=function(){ S.timeline.splice(ti,1); touch(); replaceStory(); };
+    r.appendChild(yi); r.appendChild(xi); r.appendChild(xd);
+    b.appendChild(r);
+  });
+  var add=el("button","addBtn","+ افزودن مرحله به قصه");
+  add.onclick=function(){ S.timeline=S.timeline||[]; S.timeline.push({year:"۱۴۰۳",text:""}); touch(); replaceStory(); };
+  b.appendChild(add);
+  c.appendChild(b); return c;
+}
+function replaceReviews(){ var o=document.getElementById("card-reviews"); if(o)o.replaceWith(reviewsCard()); }
+function reviewsCard(){
+  var c=card("reviews","💬","نظرات مشتری‌ها"), b=el("div","rows"), R=edits.reviews;
+  b.appendChild(fld("reviews","title","عنوان بخش",true));
+  (R.items||[]).forEach(function(it,ii){
+    var box=el("div","ev"); box.dataset.label=("نظر "+(it.name||"")).toLowerCase();
+    box.appendChild(el("div","tag","نظر "+(ii+1)));
+    var head=el("div","trow"); head.style.gridTemplateColumns="1fr 1fr 90px 40px";
+    var ni=el("input"); ni.type="text"; ni.value=it.name||""; ni.placeholder="نام";
+    ni.oninput=function(){ it.name=ni.value; touch(); };
+    var ri=el("input"); ri.type="text"; ri.value=it.role||""; ri.placeholder="نقش (مثلاً مشتری همیشگی)";
+    ri.oninput=function(){ it.role=ri.value; touch(); };
+    var si=el("input","num"); si.type="number"; si.min="1"; si.max="5"; si.value=it.stars||5; si.title="ستاره‌ها";
+    si.oninput=function(){ it.stars=Math.max(1,Math.min(5,Number(si.value)||5)); touch(); };
+    var xd=el("button","del","✖"); xd.title="حذف این نظر";
+    xd.onclick=function(){ R.items.splice(ii,1); touch(); replaceReviews(); };
+    head.appendChild(ni); head.appendChild(ri); head.appendChild(si); head.appendChild(xd);
+    box.appendChild(head);
+    var ti=el("textarea"); ti.value=it.text||""; ti.placeholder="متن نظر…";
+    ti.oninput=function(){ it.text=ti.value; touch(); };
+    box.appendChild(ti);
+    b.appendChild(box);
+  });
+  var add=el("button","addBtn","+ افزودن نظر جدید");
+  add.onclick=function(){ R.items=R.items||[]; R.items.push({name:"مشتری جدید",role:"",stars:5,text:""}); touch(); replaceReviews(); };
+  b.appendChild(add);
+  c.appendChild(b); return c;
+}
+
+/* ===== بقیه ===== */
+function beansCard(){
+  var c=card("beans","🫘","دانه‌های قهوه"), b=el("div","rows");
+  b.appendChild(fld("text","beans.secNote","توضیح بخش",true));
+  var cols="1.1fr 1.3fr 1.2fr .8fr .9fr";
+  b.appendChild(table(["نام","خاستگاه","نت‌های طعم","بوداده","قیمت"],cols));
+  for(var i=0;i<5;i++){
+    var r=el("div","trow"); r.style.gridTemplateColumns=cols;
+    r.dataset.label=("دانه قهوه "+(i+1)).toLowerCase();
+    var fields=[
+      ["beans.title2."+i,"نام",false],["beans.beanOrigin."+i,"خاستگاه",false],["beans.beanNotes."+i,"طعم‌ها",false],
+      ["beans.roastLabel."+i,"بوداده",false],["beans.beanPrice."+i,"۸۵۰,۰۰۰",true]
+    ];
+    fields.forEach(function(f){
+      var key=f[0];
+      var inp=el("input"); inp.type="text"; inp.placeholder=f[1];
+      if(f[2]) inp.className="num";
+      inp.value=cur("text",key);
+      inp.dataset.label=(labelFor(key)+" "+key).toLowerCase();
+      inp.oninput=function(){ edits.text[key]=inp.value; touch(); };
+      if(f[2]) wirePrice(inp);
+      r.appendChild(inp);
+    });
+    b.appendChild(r);
+  }
+  c.appendChild(b); return c;
+}
+function subsCard(){
+  var c=card("subscriptions","📦","اشتراک"), b=el("div","rows");
+  b.appendChild(fld("text","subscriptions.secNote","توضیح بخش",true));
+  var cols="1fr 1.5fr 1.2fr";
+  b.appendChild(table(["پلن","محتوا","قیمت"],cols));
+  for(var i=0;i<3;i++){
+    var r=el("div","trow"); r.style.gridTemplateColumns=cols;
+    r.dataset.label=("پلن اشتراک "+(i+1)).toLowerCase();
+    var fields=[
+      ["subscriptions.title2."+i,"پلن",false],["subscriptions.planWhat."+i,"محتوا",false],["subscriptions.planPrice."+i,"قیمت",true]
+    ];
+    fields.forEach(function(f){
+      var key=f[0];
+      var inp=el("input"); inp.type="text"; inp.placeholder=f[1];
+      if(f[2]) inp.className="num";
+      inp.value=cur("text",key);
+      inp.oninput=function(){ edits.text[key]=inp.value; touch(); };
+      if(f[2]) wirePrice(inp);
+      r.appendChild(inp);
+    });
+    b.appendChild(r);
+  }
+  for(var j=0;j<3;j++) b.appendChild(fld("text","subscriptions.item."+j,"قاعده "+(j+1),true));
+  b.appendChild(fld("text","subscriptions.button","متن دکمه",true));
+  c.appendChild(b); return c;
+}
+function eventsCard(){
+  var c=card("events","📅","رویدادها"), b=el("div","rows");
+  b.appendChild(fld("text","events.secNote","توضیح بخش",true));
+  for(var i=0;i<4;i++){
+    var keys={ day:"events.dateDay."+i, month:"events.dateMonth."+i, title:"events.title2."+i, when:"events.eventWhen."+i };
+    var ev=el("div","ev"); ev.dataset.label=("رویداد "+(i+1)).toLowerCase();
+    ev.appendChild(el("div","tag","رویداد "+(i+1)));
+    var r1=el("div","g3");
+    [[keys.day,"روز"],[keys.month,"ماه"],[keys.title,"عنوان"]].forEach(function(f){
+      var inp=el("input"); inp.type="text"; inp.placeholder=f[1]; inp.value=cur("text",f[0]);
+      inp.oninput=function(){ edits.text[f[0]]=inp.value; touch(); };
+      r1.appendChild(inp);
+    });
+    ev.appendChild(r1);
+    var row2=el("div","g2");
+    var wi=el("input"); wi.type="text"; wi.placeholder="زمان"; wi.value=cur("text",keys.when);
+    wi.oninput=function(){ edits.text[keys.when]=wi.value; touch(); };
+    row2.appendChild(wi);
+    row2.appendChild(fld("text","events.eventDetail."+i,"توضیح"));
+    ev.appendChild(row2);
+    b.appendChild(ev);
+  }
+  c.appendChild(b); return c;
+}
+function leftCard(){
+  var c=card("left","🏠","سربرگ و ویترین"), b=el("div","rows");
+  b.appendChild(g("g2", fld("text","left.name","نام سایت"), fld("text","left.text","وضعیت باز/بسته")));
+  b.appendChild(fld("text","left.tagline","شعار سایت",true));
+  b.appendChild(g("g3", fld("text","left.link.0","لینک 1"), fld("text","left.link.1","لینک 2"), fld("text","left.link.2","لینک 3")));
+  b.appendChild(g("g3", fld("text","left.link.3","لینک 4"), fld("text","left.link.4","لینک 5"), fld("text","left.link.5","لینک 6")));
+  b.appendChild(g("g3", fld("text","left.link2.0","موبایل 1"), fld("text","left.link2.1","موبایل 2"), fld("text","left.link2.2","موبایل 3")));
+  b.appendChild(g("g3", fld("text","left.link2.3","موبایل 4"), fld("text","left.link2.4","موبایل 5"), fld("text","left.link2.5","موبایل 6")));
+  for(var i=0;i<3;i++) b.appendChild(g("g2", fld("text","left.term."+i,"عنوان "+(i+1)), fld("text","left.body."+i,"متن "+(i+1))));
+  c.appendChild(b); return c;
+}
+function visitCard(){
+  var c=card("visit","📍","ساعت و آدرس"), b=el("div","rows");
+  b.appendChild(g("g2", fld("text","visit.label","عنوان جعبه ساعت"), fld("text","visit.label2","عنوان جعبه آدرس")));
+  for(var i=0;i<4;i++) b.appendChild(g("g2", fld("text","visit.term."+i,"روزها "+(i+1)), fld("text","visit.body."+i,"ساعت "+(i+1))));
+  b.appendChild(fld("text","visit.body","آدرس و مکان",true));
+  b.appendChild(g("g2", fld("text","visit.link","تلفن"), fld("text","visit.link2","ایمیل")));
+  for(var j=0;j<4;j++) b.appendChild(g("g2", fld("text","visit.term2."+j,"عنوان الف "+(j+1)), fld("text","visit.body2."+j,"متن الف "+(j+1))));
+  c.appendChild(b); return c;
+}
+function simpleCard(id,icon,title,keys){
+  var c=card(id,icon,title), b=el("div","rows"), row=null;
+  keys.forEach(function(k){
+    var full=isML(k,(M.text&&M.text[k])||"");
+    if (full){ b.appendChild(fld("text",k,labelFor(k),true)); row=null; }
+    else { if(!row){ row=el("div","g2"); b.appendChild(row); } row.appendChild(fld("text",k,labelFor(k))); if(row.children.length===2)row=null; }
+  });
+  c.appendChild(b); return c;
+}
+function siteCard(){
+  var c=card("site","🌐","تنظیمات سایت"), b=el("div","rows");
+  b.appendChild(fld("site","title","عنوان تب مرورگر",true));
+  b.appendChild(fld("site","description","توضیح سایت برای گوگل",true));
+  b.appendChild(fld("site","quote","نقل‌قول میان‌پرده (متن درشت طلایی)",true));
+  c.appendChild(b); return c;
+}
+function colorsCard(){
+  var names={oat:"پس‌زمینه",espresso:"رنگ متن",roast:"رنگ تأکیدی",gray:"متن ثانویه",pale:"پنل‌ها"};
+  var c=card("colors","🎨","رنگ‌ها"), gr=el("div","colorsGrid");
+  Object.keys(M.colors).forEach(function(k){
+    var cell=el("div","row colorCell"); cell.dataset.label=((names[k]||k)+" رنگ").toLowerCase();
+    cell.appendChild(el("div","lab",el("span","",names[k]||k)));
+    var inp=el("input"); inp.type="color";
+    var v=cur("colors",k); inp.value=/^#[0-9a-fA-F]{6}$/.test(v)?v:"#000000";
+    inp.oninput=function(){ edits.colors[k]=inp.value; touch(); };
+    cell.appendChild(inp); gr.appendChild(cell);
+  });
+  c.appendChild(gr); return c;
+}
+function renderAll(){
+  var main=document.getElementById("main"); main.innerHTML="";
+  var builders={settings:settingsCard,brand:brandCard,qr:qrCard,sections:sectionsCard,images:imagesCard,team:teamCard,menu:menuCard,story:storyCard,reviews:reviewsCard,beans:beansCard,subscriptions:subsCard,events:eventsCard,left:leftCard,visit:visitCard,site:siteCard,colors:colorsCard};
+  SECTIONS.forEach(function(s){
+    if (builders[s[0]]) { main.appendChild(builders[s[0]]()); return; }
+    var keys=Object.keys(M.text).filter(function(k){ return k.split(".")[0]===s[0]; });
+    main.appendChild(simpleCard(s[0], s[1], s[2], keys));
+  });
+}
+
+document.getElementById("search").oninput=function(){
+  var q=this.value.trim().toLowerCase();
+  document.querySelectorAll("#main .fld, #main .trow, #main .imgRow, #main .colorCell, #main .ev, #main .evItem").forEach(function(r){
+    r.classList.toggle("hide", !!q && (r.dataset.label||"").indexOf(q)===-1);
+  });
+  document.querySelectorAll("#main .card").forEach(function(c){
+    c.classList.toggle("hide", !!q && !c.querySelector(".fld:not(.hide), .trow:not(.hide), .ev:not(.hide), .imgRow:not(.hide)"));
+  });
+};
+
+document.getElementById("previewBtn").onclick=function(){
+  var p=document.getElementById("previewPane"); p.hidden=!p.hidden;
+  this.textContent=p.hidden?"👁 پیش‌نمایش":"✖ بستن";
+  preview();
+};
+document.getElementById("pv").onload=function(){ preview(); };
+function preview(){
+  var p=document.getElementById("previewPane"); if(!p||p.hidden)return;
+  clearTimeout(pvTimer);
+  pvTimer=setTimeout(function(){
+    try{ document.getElementById("pv").contentWindow.postMessage({type:"cms-preview",content:effective()},"*"); }catch(e){}
+  },250);
+}
+
+async function save(){
+  var data = effective();
+  var json = JSON.stringify(data, null, 2);
+  try{ localStorage.setItem(K_C, json); localStorage.removeItem(K_D); }catch(e){}
+  var text = "window.CONTENT = " + json + ";\n";
+  try{
+    if(!dirHandle) dirHandle=await window.showDirectoryPicker({mode:"readwrite"});
+    var fh=await dirHandle.getFileHandle("content.js",{create:true});
+    var w=await fh.createWritable(); await w.write(text); await w.close();
+    dirty=false; document.getElementById("dirty").hidden=true;
+    toast("✅ ذخیره شد! سایت را رفرش کن.");
+  }catch(e){
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([text],{type:"text/javascript"}));
+    a.download="content.js"; a.click();
+    dirty=false; document.getElementById("dirty").hidden=true;
+    toast("⬇ فایل content.js دانلود شد؛ آن را داخل پوشه سایت جایگزین کن.");
+  }
+}
+document.getElementById("saveBtn").onclick=save;
+document.addEventListener("keydown",function(e){ if((e.ctrlKey||e.metaKey)&&e.key==="s"){ e.preventDefault(); save(); } });
+document.getElementById("resetBtn").onclick=function(){
+  if(!confirm("همه تغییرات به قالب اصلی برگردد؟"))return;
+  edits={site:{},text:{},images:{},colors:{}};
+  MD=deep(M.menu||[]);
+  edits.story=deep(M.story); edits.reviews=deep(M.reviews); edits.settings=deep(DEF_SETTINGS);
+  try{ localStorage.removeItem(K_D); }catch(e){}
+  renderAll(); touch(); toast("♻ به قالب برگشت؛ برای قطعی شدن ذخیره کن.");
+};
+window.addEventListener("beforeunload",function(e){ if(dirty){ e.preventDefault(); e.returnValue=""; } });
+</script>
+</body>
+</html>

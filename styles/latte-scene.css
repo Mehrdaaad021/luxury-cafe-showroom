@@ -1,0 +1,73 @@
+/* ============================================================
+   latte-scene.css — دانه‌های قهوه → فنجان → لاته آرت → بخار
+   بعد از custom.css لود شود
+   ============================================================ */
+
+/* فنجان/تصویر قدیمی را پنهان کن و صحنه‌ی جدید را نشان بده */
+.lc-stage > :not(.lcScene){ display:none !important; }
+.lc-stage{
+  cursor:pointer;
+  background:radial-gradient(70% 62% at 50% 42%, #f6dab6 0%, #e8c6a0 58%, #d9b28b 100%);
+}
+.lcScene{ position:absolute; inset:0; display:grid; place-items:center; }
+.lcGlow{
+  position:absolute; inset:10%; border-radius:50%; pointer-events:none; opacity:0;
+  background:radial-gradient(closest-side, rgba(255,236,200,.75), rgba(255,236,200,0) 72%);
+  transition:opacity 1.8s ease;
+}
+.lcScene.is-milk .lcGlow{ opacity:1; }
+.lcSvg{ position:relative; width:88%; height:auto; overflow:visible; }
+
+/* ---------- لایه‌ی دانه‌های در حال سقوط (کل صفحه) ---------- */
+.lcBeans{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:45; }
+.lcBean{ position:absolute; left:0; top:0; will-change:transform,opacity;
+  filter:drop-shadow(0 6px 5px rgba(46,30,24,.3)); }
+.lcBean svg{ display:block; width:100%; height:100%; }
+
+/* ---------- مایعات ---------- */
+.lcEsp,.lcMilk{ transform-box:fill-box; transform-origin:50% 50%; }
+.lcEsp{ opacity:0; transform:translateY(16px) scale(.6,.45);
+  transition:opacity .8s ease, transform 1.6s cubic-bezier(.22,1,.36,1); }
+.is-esp .lcEsp{ opacity:1; transform:none; }
+
+.lcMilk{ opacity:0; transform:scale(.02);
+  transition:opacity .6s ease, transform 2.4s cubic-bezier(.22,1,.36,1); }
+.is-milk .lcMilk{ opacity:1; transform:scale(.94); }
+
+.lcShine{ opacity:0; transition:opacity 1.4s ease; }
+.is-milk .lcShine{ opacity:1; transition-delay:1.2s; }
+
+/* ---------- لاته آرت: سه قلب تو در تو + خط کشیدنی ---------- */
+.lcArt{ opacity:0; transform:scale(.15); transform-box:fill-box; transform-origin:50% 50%;
+  transition:opacity .5s ease, transform .9s cubic-bezier(.34,1.56,.64,1); }
+.is-art .lcArt{ opacity:1; transform:none; }
+.is-art .a2{ transition-delay:.45s; }
+.is-art .a3{ transition-delay:.9s; }
+.lcLine{ stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .9s ease; }
+.is-art .lcLine{ stroke-dashoffset:0; transition-delay:1.4s; }
+
+/* ---------- بخار ---------- */
+.lcSteam{ transition:opacity .7s ease; }
+.is-out .lcSteam{ opacity:0; }
+.lcSt{ fill:none; stroke:#fffdf8; stroke-width:7; stroke-linecap:round; opacity:0;
+  transform-box:fill-box; transform-origin:50% 100%;
+  filter:blur(2.6px) drop-shadow(0 0 5px rgba(120,76,44,.28)); }
+.is-steam .lcSt{ animation:lcSteam 4.4s ease-in-out infinite; }
+.is-steam .lcStB{ animation-delay:1.5s; animation-duration:4.9s; }
+.is-steam .lcStC{ animation-delay:3s;   animation-duration:4.1s; }
+@keyframes lcSteam{
+  0%  { opacity:0;   transform:translate(0,10px) scaleY(.7); }
+  25% { opacity:.9; }
+  55% { opacity:.6;  transform:translate(-6px,-22px) scaleY(1); }
+  100%{ opacity:0;   transform:translate(5px,-56px) scaleY(1.2); }
+}
+
+/* ---------- محو سریع قبل از شروع دوباره ---------- */
+.is-out .lcEsp,.is-out .lcMilk,.is-out .lcArt,.is-out .lcLine,.is-out .lcShine{
+  transition-duration:.6s !important; transition-delay:0s !important; }
+
+/* ---------- کاهش حرکت ---------- */
+@media (prefers-reduced-motion: reduce){
+  .lcScene *{ transition:none !important; }
+  .lcSt{ animation:none !important; opacity:.4; }
+}
