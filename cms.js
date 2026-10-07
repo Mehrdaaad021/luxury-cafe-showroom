@@ -1,4 +1,4 @@
-// cms.js — نسخه ۲۹: ولوم بالاتر + همه قابلیت‌های قبلی
+// cms.js — نسخه ۳۰: دکمهٔ منوی موبایل طلایی + پنل شیشه‌ای + همه قابلیت‌ها
 (function () {
   var K_C = "cms-content-v2";
   var DEFAULT_HERO = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1400&auto=format&fit=crop";
@@ -44,6 +44,25 @@
   var EXTRA_CSS =
     '.skip{position:fixed;top:-70px;inset-inline-start:16px;z-index:99;background:var(--gold);color:var(--bg);padding:10px 18px;border-radius:2px;font-size:13px;text-decoration:none;transition:top .2s ease}' +
     '.skip:focus{top:12px}' +
+    /* ===== دکمهٔ منوی موبایل: پیل طلایی ===== */
+    '.template-menu__toggle{display:inline-flex !important;align-items:center;gap:10px;' +
+      'background:linear-gradient(145deg,var(--gold),var(--gold-d)) !important;color:#171310 !important;' +
+      'border:0 !important;border-radius:999px !important;padding:10px 22px !important;' +
+      'font-family:"Shabnam",Tahoma,sans-serif !important;font-size:13px !important;font-weight:700 !important;letter-spacing:0 !important;' +
+      'box-shadow:0 8px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.5) !important;' +
+      'cursor:pointer;transition:transform .2s ease, box-shadow .2s ease}' +
+    '.template-menu__toggle:hover{transform:translateY(-1px)}' +
+    '.template-menu__icon{width:18px !important;height:14px !important;position:relative !important;display:inline-block !important;background:transparent !important}' +
+    '.template-menu__icon span{position:absolute !important;inset-inline:0 !important;height:2px !important;border-radius:2px !important;background:#171310 !important}' +
+    '.template-menu__icon span:first-child{top:2px !important}' +
+    '.template-menu__icon span:last-child{bottom:2px !important}' +
+    /* ===== پنل بازشو: شیشهٔ تیره طلایی ===== */
+    '.template-menu__panel{background:rgba(14,12,10,.94) !important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);' +
+      'border:1px solid var(--gold-line) !important;border-radius:14px !important;padding:8px !important;margin-top:8px !important;' +
+      'box-shadow:0 20px 40px rgba(0,0,0,.5) !important}' +
+    '.template-menu__panel a{display:block;color:var(--cream) !important;text-decoration:none !important;font-size:14px !important;' +
+      'padding:10px 14px !important;border-radius:8px !important;transition:all .2s ease}' +
+    '.template-menu__panel a:hover{background:rgba(216,192,138,.14);color:var(--gold) !important}' +
     '.clubStamps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}' +
     '.stamp{aspect-ratio:1;border-radius:50%;border:1px dashed var(--gold-line);display:grid;place-items:center;color:var(--faint);font-size:15px;transition:all .3s ease}' +
     '.stamp.on{border-style:solid;border-color:var(--gold);color:var(--gold);background:rgba(216,192,138,.10);box-shadow:inset 0 0 12px rgba(216,192,138,.25)}' +
@@ -258,6 +277,18 @@
     } else if (ex) ex.remove();
   }
 
+  /* برچسب فارسی روی دکمهٔ منوی موبایل */
+  function relabelMobileMenu() {
+    var sum = document.querySelector(".template-menu__toggle");
+    if (!sum || sum.dataset.fa) return;
+    sum.dataset.fa = "1";
+    var icon = sum.querySelector(".template-menu__icon");
+    sum.innerHTML = "";
+    if (icon) sum.appendChild(icon);
+    sum.appendChild(document.createTextNode("منو"));
+    sum.setAttribute("aria-label", "باز و بسته کردن منو");
+  }
+
   function initClock() {
     var p = document.querySelector("p.status");
     if (!p || document.getElementById("liveClock")) return;
@@ -280,7 +311,7 @@
     setInterval(tick, 1000);
   }
 
-  /* ===== 🎷 موسیقی: جَز زنده یا MP3 — با ولوم قوی‌تر ===== */
+  /* ===== 🎷 موسیقی ===== */
   var audioCtx = null, jazz = null, musicEl = null, soundOn = false;
   function mf(m){ return 440 * Math.pow(2, (m - 69) / 12); }
   var PROG = [
@@ -1141,6 +1172,7 @@
 
   function injectOnce() {
     if (document.querySelector(".dock")) return;
+    relabelMobileMenu();
     if (!document.querySelector(".skip")) {
       var sk = document.createElement("a");
       sk.className = "skip";
